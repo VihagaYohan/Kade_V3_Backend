@@ -28,7 +28,7 @@ exports.getAllUsers = async (req, res, next) => {
 // @access  private
 exports.getUser = async (req, res, next) => {
   try {
-    const user = await User.find({ _id: req.params.id });
+    const user = await User.findById(req.params.id);
     if (!user)
       return res
         .status(404)
@@ -39,7 +39,7 @@ exports.getUser = async (req, res, next) => {
       data: user,
     });
   } catch (error) {
-    res.status(500).json({ sucess: false, data: error });
+    res.status(500).json({ sucess: false, data: error.message });
   }
 };
 
@@ -87,7 +87,7 @@ exports.addUser = async (req, res, next) => {
 };
 
 // @desc    update  user
-// @route   PUT/api/users/
+// @route   PUT/api/users/:id
 // @access  private
 exports.updateUser = async (req, res, next) => {
   try {
@@ -125,5 +125,30 @@ exports.updateUser = async (req, res, next) => {
     });
   } catch (error) {
     res.status(500).json({ sucess: false, data: `Error : ${error.message}` });
+  }
+};
+
+// @desc    delete user
+// @route   DELETE/api/users/:id,
+// @access  private
+exports.deleteUser = async (req, res, next) => {
+  try {
+    // find user
+    const user = await User.findByIdAndRemove(req.params.id);
+    if (!user)
+      return res.status(404).json({
+        sucess: false,
+        data: "The user with given ID was not found ",
+      });
+
+    res.status(200).json({
+      sucess: true,
+      data: `${user.name} user has been removed`,
+    });
+  } catch (error) {
+    res.status(500).json({
+      sucess: true,
+      data: `Errro: ${error.message}`,
+    });
   }
 };
