@@ -85,3 +85,45 @@ exports.addUser = async (req, res, next) => {
     });
   }
 };
+
+// @desc    update  user
+// @route   PUT/api/users/
+// @access  private
+exports.updateUser = async (req, res, next) => {
+  try {
+    // validation
+    const { error } = validationUser(req.body);
+    if (error)
+      return res.status(400).json({
+        sucess: false,
+        data: error.details[0].message,
+      });
+
+    const { name, email, phoneNumber } = req.body;
+
+    // update user details
+    const user = await User.findByIdAndUpdate(
+      req.params.id,
+      {
+        name,
+        email,
+        phoneNumber,
+      },
+      { new: true }
+    );
+
+    if (!user) {
+      return res.status(404).json({
+        sucess: false,
+        data: "The user with the given ID was not found",
+      });
+    }
+
+    res.status(200).json({
+      sucess: false,
+      data: user,
+    });
+  } catch (error) {
+    res.status(500).json({ sucess: false, data: `Error : ${error.message}` });
+  }
+};
