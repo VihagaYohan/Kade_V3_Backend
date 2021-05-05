@@ -28,7 +28,7 @@ exports.getAllUsers = async (req, res, next) => {
 // @access  private
 exports.getUser = async (req, res, next) => {
   try {
-    const user = await User.find({ _id: req.params.id });
+    const user = await User.findById(req.params.id);
     if (!user)
       return res
         .status(404)
@@ -39,7 +39,7 @@ exports.getUser = async (req, res, next) => {
       data: user,
     });
   } catch (error) {
-    res.status(500).json({ sucess: false, data: error });
+    res.status(500).json({ sucess: false, data: error.message });
   }
 };
 
@@ -82,6 +82,73 @@ exports.addUser = async (req, res, next) => {
     res.status(500).json({
       sucess: false,
       data: `Failed : ${error.message}`,
+    });
+  }
+};
+
+// @desc    update  user
+// @route   PUT/api/users/:id
+// @access  private
+exports.updateUser = async (req, res, next) => {
+  try {
+    // validation
+    const { error } = validationUser(req.body);
+    if (error)
+      return res.status(400).json({
+        sucess: false,
+        data: error.details[0].message,
+      });
+
+    const { name, email, phoneNumber } = req.body;
+
+    // update user details
+    const user = await User.findByIdAndUpdate(
+      req.params.id,
+      {
+        name,
+        email,
+        phoneNumber,
+      },
+      { new: true }
+    );
+
+    if (!user) {
+      return res.status(404).json({
+        sucess: false,
+        data: "The user with the given ID was not found",
+      });
+    }
+
+    res.status(200).json({
+      sucess: false,
+      data: user,
+    });
+  } catch (error) {
+    res.status(500).json({ sucess: false, data: `Error : ${error.message}` });
+  }
+};
+
+// @desc    delete user
+// @route   DELETE/api/users/:id,
+// @access  private
+exports.deleteUser = async (req, res, next) => {
+  try {
+    // find user
+    const user = await User.findByIdAndRemove(req.params.id);
+    if (!user)
+      return res.status(404).json({
+        sucess: false,
+        data: "The user with given ID was not found ",
+      });
+
+    res.status(200).json({
+      sucess: true,
+      data: `${user.name} user has been removed`,
+    });
+  } catch (error) {
+    res.status(500).json({
+      sucess: true,
+      data: `Errro: ${error.message}`,
     });
   }
 };
