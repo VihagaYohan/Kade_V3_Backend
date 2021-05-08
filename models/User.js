@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const Joi = require("joi");
+const jwt = require("jsonwebtoken");
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -68,6 +69,13 @@ const validationUser = (user) => {
   });
 
   return schema.validate(user);
+};
+
+// create Signed and return JWT token
+userSchema.method.getSignedJwtToken = function () {
+  return jwt.sign({ id: this._id, role: this.role }, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_EXPIRE,
+  });
 };
 
 module.exports = {
