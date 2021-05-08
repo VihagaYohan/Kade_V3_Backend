@@ -1,6 +1,9 @@
 const bcrypt = require("bcryptjs");
 const { User, validationUser } = require("../models/User");
 
+// @desc    register new user
+// @route   POST/api/auth/register
+// @access  public
 exports.registerUser = async (req, res, next) => {
   try {
     const { name, email, password, phoneNumber } = req.body;
