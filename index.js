@@ -7,7 +7,8 @@ const colors = require("colors");
 const connectDB = require("./config/db");
 
 // import route files
-const users = require('./routes/users')
+const users = require("./routes/users");
+const auth = require("./routes/auth");
 
 const app = express();
 
@@ -21,9 +22,10 @@ dotenv.config({ path: "./config/config.env" });
 connectDB();
 
 // init routes
-app.use('/api/users/',users)
+app.use("/api/users/", users);
+app.use("/api/auth/", auth);
 
-const PORT =  8000;
+const PORT = 8000;
 
 // listen to server port
 app.listen(PORT, () => {
