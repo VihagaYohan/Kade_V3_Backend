@@ -8,6 +8,7 @@ const {
 const jwt = require("jsonwebtoken");
 const Joi = require("joi");
 const sendEmail = require("../utility/sendEmail");
+const { getForgotPasswordEmail } = require("../email/GetForgotPasswordEmail");
 
 // @desc    register new user
 // @route   POST/api/auth/register
@@ -152,9 +153,10 @@ exports.forgotPassword = async (req, res, next) => {
     // sending email to user
     try {
       await sendEmail({
-        email: user.email,
+        email: "vihagayohan94@gmail.com",
         subject: "Password reset - Kade",
         message: message,
+        html: getForgotPasswordEmail(user.name, resetURL),
       });
 
       res.status(200).json({
