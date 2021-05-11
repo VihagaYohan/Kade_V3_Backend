@@ -3,6 +3,9 @@ const dotenv = require("dotenv");
 const morgan = require("morgan");
 const colors = require("colors");
 
+// import middle-wear
+const errorHandler = require("./middlewear/error");
+
 // import DB connection
 const connectDB = require("./config/db");
 
@@ -24,6 +27,9 @@ connectDB();
 // init routes
 app.use("/api/users/", users);
 app.use("/api/auth/", auth);
+
+// initiate middle-wear
+app.use(errorHandler);
 
 const PORT = 8000;
 
