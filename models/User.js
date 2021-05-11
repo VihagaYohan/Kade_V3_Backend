@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const Joi = require("joi");
 const jwt = require("jsonwebtoken");
+const crypto = require("crypto");
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -58,6 +59,23 @@ userSchema.methods.generateAuthToken = function () {
   });
 };
 
+// create reset password token and set reset password & token expire date
+userSchema.methods.getResetPasswordToken = async function () {
+  // generate token
+  const resetToken = await crypto.randomBytes(20).toString("hex");
+
+  // hash token and set to resetPasswordToken field
+  this.resetPasswordToken = await crypto
+    .createHash("sha256")
+    .update(resetToken)
+    .digest("hex");
+
+  // set expire
+  this.resetPasswordExpire = Date.now() + 10 * 60 * 1000;
+  return resetToken;
+};
+
+// create user model
 const User = mongoose.model("User", userSchema);
 
 // validation for user model
@@ -93,9 +111,24 @@ const validationLogin = (loginData) => {
   return schema.validate(loginData);
 };
 
+// user reset password validation - email address
+const validationResetPassword = (email) => {
+  const schema = Joi.object({
+    email: Joi.string()
+      .email({
+        minDomainSegments: 2,
+        tlds: { allow: ["com", "net"] },
+      })
+      .required(),
+  });
+
+  return schema.validate(email);
+};
+
 module.exports = {
   User,
   userSchema,
   validationUser,
-  validationLogin
+  validationLogin,
+  validationResetPassword,
 };
