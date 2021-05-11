@@ -1,6 +1,13 @@
 const bcrypt = require("bcryptjs");
-const { User, validationUser } = require("../models/User");
+const {
+  User,
+  validationUser,
+  validationLogin,
+  validationResetPassword,
+} = require("../models/User");
 const jwt = require("jsonwebtoken");
+const Joi = require("joi");
+const sendEmail = require("../utility/sendEmail");
 
 // @desc    register new user
 // @route   POST/api/auth/register
@@ -30,17 +37,24 @@ exports.registerUser = async (req, res, next) => {
     const hashedPassword = await bcrypt.hash(req.body.password, salt);
 
     // create new user
-    user = new User({ name, email, password: hashedPassword, phoneNumber });
-    user = await user.save();
+    user = await User.create({
+      name,
+      email,
+      password: hashedPassword,
+      phoneNumber,
+    });
+    //user = await user.save();
 
-    // create token
+    const token = user.generateAuthToken();
+
+    /* // create token
     const token = jwt.sign(
       { _id: user.id, role: user.role },
       process.env.JWT_SECRET,
       {
         expiresIn: process.env.JWT_EXPIRE,
       }
-    );
+    ); */
 
     res.status(200).json({
       sucess: true,
@@ -61,6 +75,103 @@ exports.registerUser = async (req, res, next) => {
 // @access  private
 exports.loginUser = async (req, res, next) => {
   try {
+    const { email, password } = req.body;
+
+    // validate email and password
+    const { error } = validationLogin(req.body);
+    if (error)
+      return res.status(400).json({
+        sucess: false,
+        msg: error.details[0].message,
+      });
+
+    // check for user in the database
+    const user = await User.findOne({ email }).select("+password");
+    if (!user)
+      return res.status(400).json({
+        sucess: false,
+        msg: "Invalid email or password",
+      });
+
+    // check for password validity
+    const result = await bcrypt.compare(password, user.password);
+    if (!result)
+      return res.status(400).json({
+        sucess: false,
+        msg: "Invalid email or password",
+      });
+
+    // create JWT token
+    const token = user.generateAuthToken();
+
+    res.status(200).json({
+      sucess: true,
+      token: token,
+    });
+  } catch (error) {
+    res.status(500).json({
+      suscess: false,
+      msg: `Falied: ${error.message}`,
+    });
+  }
+};
+
+// @desc    forgot password
+// @route   POST/api/auth/forgotPassword
+// @access  private
+exports.forgotPassword = async (req, res, next) => {
+  try {
+    const email = req.body.email;
+
+    // check for validation - email format
+    const { error } = validationResetPassword(req.body);
+    if (error)
+      return res.status(400).json({
+        sucess: false,
+        mgs: error.details[0].message,
+      });
+
+    // find user with provided email address
+    const user = await User.findOne({ email: email });
+    if (!user)
+      return res.status(404).json({
+        sucess: false,
+        mgs: "User not found for the given email",
+      });
+
+    // get reset password token
+    var resetToken = await user.getResetPasswordToken();
+
+    // create reset URL
+    const resetURL = `${req.protocol}://${req.get(
+      "host"
+    )}/api/auth/resetPassword/${resetToken}`;
+
+    const message = `You are receving this email because you (or someone else) has requested the reset of a password. Please make a put request to : \n\n${resetURL}`;
+
+    // sending email to user
+    try {
+      await sendEmail({
+        email: user.email,
+        subject: "Password reset - Kade",
+        message: message,
+      });
+
+      res.status(200).json({
+        sucess: true,
+        data: "Email has been send",
+      });
+    } catch (error) {
+      user.resetPasswordToken = undefined;
+      user.resetPasswordExpire = undefined;
+
+      await user.save({ validationBeforeSave: false });
+
+      res.status(500).json({
+        sucess: false,
+        mgs: "Email could not be sent",
+      });
+    }
   } catch (error) {
     res.status(500).json({
       suscess: false,
