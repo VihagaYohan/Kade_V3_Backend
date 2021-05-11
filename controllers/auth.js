@@ -7,7 +7,9 @@ const {
 } = require("../models/User");
 const jwt = require("jsonwebtoken");
 const Joi = require("joi");
+const crypto = require("crypto");
 const sendEmail = require("../utility/sendEmail");
+const { getForgotPasswordEmail } = require("../email/GetForgotPasswordEmail");
 
 // @desc    register new user
 // @route   POST/api/auth/register
@@ -132,7 +134,7 @@ exports.forgotPassword = async (req, res, next) => {
       });
 
     // find user with provided email address
-    const user = await User.findOne({ email: email });
+    let user = await User.findOne({ email: email });
     if (!user)
       return res.status(404).json({
         sucess: false,
@@ -141,6 +143,9 @@ exports.forgotPassword = async (req, res, next) => {
 
     // get reset password token
     var resetToken = await user.getResetPasswordToken();
+
+    // save user with reset password token and reset password expire to DB
+    user = await user.save();
 
     // create reset URL
     const resetURL = `${req.protocol}://${req.get(
@@ -152,9 +157,10 @@ exports.forgotPassword = async (req, res, next) => {
     // sending email to user
     try {
       await sendEmail({
-        email: user.email,
+        email: "vihagayohan94@gmail.com",
         subject: "Password reset - Kade",
         message: message,
+        html: getForgotPasswordEmail(user.name, resetURL),
       });
 
       res.status(200).json({
@@ -176,6 +182,52 @@ exports.forgotPassword = async (req, res, next) => {
     res.status(500).json({
       suscess: false,
       msg: `Falied: ${error.message}`,
+    });
+  }
+};
+
+// @desc    reset password
+// @route   PUT/api/auth/resetPassword/:resetToken
+// @access  public
+exports.resetPassword = async (req, res, next) => {
+  try {
+    // get hashed token
+    const resetPasswordToken = crypto
+      .createHash("sha256")
+      .update(req.params.resetToken)
+      .digest("hex");
+
+    console.log(resetPasswordToken);
+
+    // find user and check if the token is valid
+    let user = await User.findOne({
+      resetPasswordToken,
+      resetPasswordExpire: { $gt: Date.now() },
+    });
+    if (!user)
+      return res.status(400).json({ sucess: false, msg: "Invalid token" });
+
+    // set new password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(req.body.password, salt);
+    user.password = hashedPassword;
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpire = undefined;
+
+    // save user with new password
+    user = await user.save();
+
+    // return JWT token
+    const token = user.generateAuthToken();
+
+    res.status(200).json({
+      sucess: true,
+      token: token,
+    });
+  } catch (error) {
+    res.status(500).json({
+      sucess: false,
+      msg: error.message,
     });
   }
 };
