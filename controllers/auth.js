@@ -10,6 +10,7 @@ const Joi = require("joi");
 const crypto = require("crypto");
 const sendEmail = require("../utility/sendEmail");
 const { getForgotPasswordEmail } = require("../email/GetForgotPasswordEmail");
+const ErrorResponse = require("../utility/errorResponse");
 
 // @desc    register new user
 // @route   POST/api/auth/register
@@ -21,18 +22,17 @@ exports.registerUser = async (req, res, next) => {
     // check for user data validation
     const { error } = validationUser(req.body);
     if (error)
-      return res.status(400).json({
-        sucess: false,
-        msg: error.details[0].message,
-      });
+      return next(new ErrorResponse(`${error.details[0].message}`, 400));
 
     // check if the user email address already exists
     let user = await User.findOne({ email });
     if (user)
-      return res.status(400).json({
-        sucess: false,
-        msg: "User email already exists",
-      });
+      return next(new ErrorResponse(`The user email already exists`, 400));
+
+    // check if the user phone number already exists
+    user = await User.findOne({ phoneNumber });
+    if (user)
+      return next(new ErrorResponse("Phone number already exists", 400));
 
     // hashing user password
     const salt = await bcrypt.genSalt(10);
@@ -45,18 +45,9 @@ exports.registerUser = async (req, res, next) => {
       password: hashedPassword,
       phoneNumber,
     });
-    //user = await user.save();
 
+    // create JWT token
     const token = user.generateAuthToken();
-
-    /* // create token
-    const token = jwt.sign(
-      { _id: user.id, role: user.role },
-      process.env.JWT_SECRET,
-      {
-        expiresIn: process.env.JWT_EXPIRE,
-      }
-    ); */
 
     res.status(200).json({
       sucess: true,
@@ -64,11 +55,7 @@ exports.registerUser = async (req, res, next) => {
       token: token,
     });
   } catch (error) {
-    console.log(error);
-    res.status(500).json({
-      sucess: false,
-      msg: `Failed: ${error.message}`,
-    });
+    next(new ErrorResponse(`${error.message}`, 500));
   }
 };
 
@@ -81,27 +68,16 @@ exports.loginUser = async (req, res, next) => {
 
     // validate email and password
     const { error } = validationLogin(req.body);
-    if (error)
-      return res.status(400).json({
-        sucess: false,
-        msg: error.details[0].message,
-      });
+    if (error) return next(new ErrorResponse(error.details[0].message, 400));
 
     // check for user in the database
     const user = await User.findOne({ email }).select("+password");
-    if (!user)
-      return res.status(400).json({
-        sucess: false,
-        msg: "Invalid email or password",
-      });
+    if (!user) return next(new ErrorResponse("Invalid email or password", 400));
 
     // check for password validity
     const result = await bcrypt.compare(password, user.password);
     if (!result)
-      return res.status(400).json({
-        sucess: false,
-        msg: "Invalid email or password",
-      });
+      return next(new ErrorResponse("Invalid email or password", 400));
 
     // create JWT token
     const token = user.generateAuthToken();
@@ -111,10 +87,7 @@ exports.loginUser = async (req, res, next) => {
       token: token,
     });
   } catch (error) {
-    res.status(500).json({
-      suscess: false,
-      msg: `Falied: ${error.message}`,
-    });
+    next(new ErrorResponse("${error.message}", 500));
   }
 };
 
@@ -127,19 +100,12 @@ exports.forgotPassword = async (req, res, next) => {
 
     // check for validation - email format
     const { error } = validationResetPassword(req.body);
-    if (error)
-      return res.status(400).json({
-        sucess: false,
-        mgs: error.details[0].message,
-      });
+    if (error) return next(new ErrorResponse(error.details[0].message, 400));
 
     // find user with provided email address
     let user = await User.findOne({ email: email });
     if (!user)
-      return res.status(404).json({
-        sucess: false,
-        mgs: "User not found for the given email",
-      });
+      return next(new ErrorResponse("User not found for the given email", 404));
 
     // get reset password token
     var resetToken = await user.getResetPasswordToken();
@@ -173,16 +139,10 @@ exports.forgotPassword = async (req, res, next) => {
 
       await user.save({ validationBeforeSave: false });
 
-      res.status(500).json({
-        sucess: false,
-        mgs: "Email could not be sent",
-      });
+      return next(new ErrorResponse("Email could not be sent", 500));
     }
   } catch (error) {
-    res.status(500).json({
-      suscess: false,
-      msg: `Falied: ${error.message}`,
-    });
+    next(new ErrorResponse(error.message, 500));
   }
 };
 
@@ -204,8 +164,7 @@ exports.resetPassword = async (req, res, next) => {
       resetPasswordToken,
       resetPasswordExpire: { $gt: Date.now() },
     });
-    if (!user)
-      return res.status(400).json({ sucess: false, msg: "Invalid token" });
+    if (!user) return next(new ErrorResponse("Invalid token", 400));
 
     // set new password
     const salt = await bcrypt.genSalt(10);
@@ -225,9 +184,6 @@ exports.resetPassword = async (req, res, next) => {
       token: token,
     });
   } catch (error) {
-    res.status(500).json({
-      sucess: false,
-      msg: error.message,
-    });
+    next(new ErrorResponse(error.message, 500));
   }
 };

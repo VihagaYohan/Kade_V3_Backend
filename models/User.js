@@ -33,6 +33,7 @@ const userSchema = new mongoose.Schema({
     required: [true, "Please add a phone number"],
     trim: true,
     maxlength: [10, "Phone number shoud not be longer than 10 characters"],
+    unieq: true,
   },
   role: {
     type: String,

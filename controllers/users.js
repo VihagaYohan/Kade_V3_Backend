@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 
+const ErrorResponse = require("../utility/errorResponse");
 const { User, validationUser } = require("../models/User");
 
 // @desc    get all users
@@ -10,16 +11,14 @@ exports.getAllUsers = async (req, res, next) => {
   try {
     const users = await User.find().sort("name");
     if (!users)
-      return res
-        .status(404)
-        .json({ sucess: false, data: "There are no users to show" });
+      return next(new ErrorResponse("There are no users to show", 404));
 
     res.status(200).json({
       sucess: true,
       data: users,
     });
   } catch (error) {
-    res.status(500).json({ sucess: false, data: error });
+    next(new ErrorResponse(`${error.message}`, 500));
   }
 };
 
@@ -30,16 +29,16 @@ exports.getUser = async (req, res, next) => {
   try {
     const user = await User.findById(req.params.id);
     if (!user)
-      return res
-        .status(404)
-        .json({ sucess: false, data: "User not found for the given ID" });
+      return next(
+        new ErrorResponse(`User for the given ID was not found`, 404)
+      );
 
     res.status(200).json({
       sucess: true,
       data: user,
     });
   } catch (error) {
-    res.status(500).json({ sucess: false, data: error.message });
+    next(new ErrorResponse(`${error.message}`, 500));
   }
 };
 
@@ -51,17 +50,11 @@ exports.addUser = async (req, res, next) => {
     // check user input data validation
     const { error } = validationUser(req.body);
     if (error)
-      return res.status(400).json({
-        sucess: false,
-        data: error.details[0].message,
-      });
+      return next(new ErrorResponse(`${error.details[0].message}`, 400));
 
     // check if the user already exists in the database
     let user = await User.findOne({ email: req.body.email });
-    if (user)
-      return res
-        .status(404)
-        .json({ sucess: false, data: "User already exists" });
+    if (user) return next(new ErrorResponse(`User already exists`, 400));
 
     // hasing user password
     const salt = await bcrypt.genSalt(10);
@@ -79,10 +72,7 @@ exports.addUser = async (req, res, next) => {
 
     res.status(200).json({ sucess: true, data: user });
   } catch (error) {
-    res.status(500).json({
-      sucess: false,
-      data: `Failed : ${error.message}`,
-    });
+    next(new ErrorResponse(`${error.message}`, 500));
   }
 };
 
@@ -94,10 +84,7 @@ exports.updateUser = async (req, res, next) => {
     // validation
     const { error } = validationUser(req.body);
     if (error)
-      return res.status(400).json({
-        sucess: false,
-        data: error.details[0].message,
-      });
+      return next(new ErrorResponse(`${error.details[0].message}`, 400));
 
     const { name, email, phoneNumber } = req.body;
 
@@ -113,10 +100,9 @@ exports.updateUser = async (req, res, next) => {
     );
 
     if (!user) {
-      return res.status(404).json({
-        sucess: false,
-        data: "The user with the given ID was not found",
-      });
+      return next(
+        new ErrorResponse(`The user with the given ID was not found`, 404)
+      );
     }
 
     res.status(200).json({
@@ -124,7 +110,7 @@ exports.updateUser = async (req, res, next) => {
       data: user,
     });
   } catch (error) {
-    res.status(500).json({ sucess: false, data: `Error : ${error.message}` });
+    next(new ErrorResponse(`${error.message}`, 500));
   }
 };
 
@@ -136,19 +122,15 @@ exports.deleteUser = async (req, res, next) => {
     // find user
     const user = await User.findByIdAndRemove(req.params.id);
     if (!user)
-      return res.status(404).json({
-        sucess: false,
-        data: "The user with given ID was not found ",
-      });
+      return next(
+        new ErrorResponse("The user with given ID was not found", 404)
+      );
 
     res.status(200).json({
       sucess: true,
       data: `${user.name} user has been removed`,
     });
   } catch (error) {
-    res.status(500).json({
-      sucess: true,
-      data: `Errro: ${error.message}`,
-    });
+    next(new ErrorResponse(`${error.message}`, 500));
   }
 };
