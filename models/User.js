@@ -51,6 +51,13 @@ const userSchema = new mongoose.Schema({
   },
 });
 
+// create Signed and return JWT token
+userSchema.methods.generateAuthToken = function () {
+  return jwt.sign({ id: this._id, role: this.role }, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_EXPIRE,
+  });
+};
+
 const User = mongoose.model("User", userSchema);
 
 // validation for user model
@@ -71,15 +78,24 @@ const validationUser = (user) => {
   return schema.validate(user);
 };
 
-// create Signed and return JWT token
-userSchema.method.getSignedJwtToken = function () {
-  return jwt.sign({ id: this._id, role: this.role }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRE,
+// user login data validation - email address and password
+const validationLogin = (loginData) => {
+  const schema = Joi.object({
+    email: Joi.string()
+      .email({
+        minDomainSegments: 2,
+        tlds: { allow: ["com", "net"] },
+      })
+      .required(),
+    password: Joi.string().required().min(4),
   });
+
+  return schema.validate(loginData);
 };
 
 module.exports = {
   User,
   userSchema,
   validationUser,
+  validationLogin
 };
