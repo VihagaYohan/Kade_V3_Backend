@@ -8,6 +8,8 @@ const connectDB = async () => {
     useFindAndModify: false,
   });
 
+  console.log(conn.connection.host.cyan.underline);
+  console.log(conn.connection.port)
   console.log(
     `MongoDB connected : ${conn.Connection.host}`.cyan.underline.bold
   );
