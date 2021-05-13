@@ -12,6 +12,7 @@ const connectDB = require("./config/db");
 // import route files
 const users = require("./routes/users");
 const auth = require("./routes/auth");
+const shops = require('./routes/shops')
 
 const app = express();
 
@@ -27,6 +28,7 @@ connectDB();
 // init routes
 app.use("/api/users/", users);
 app.use("/api/auth/", auth);
+app.use('/api/shops/',shops)
 
 // initiate middle-wear
 app.use(errorHandler);
