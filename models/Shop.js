@@ -87,13 +87,20 @@ const Shop = mongoose.model("Shop", shopSchema);
 const validationShop = (shop) => {
   const schema = Joi.object({
     name: Joi.string().max(20).min(4).required(),
-    email: Joi.string()
+    userId: Joi.objectId().required(),
+    /*  email: Joi.string()
       .email({
         minDomainSegments: 2,
         tlds: { allow: ["com", "net"] },
       })
-      .required(),
-    phoneNumber: Joi.array().items(Joi.strinng()).required(),
+      .required(), */
+    email: Joi.array().items(
+      Joi.string().email({
+        minDomainSegments: 2,
+        tlds: { allow: ["com", "net"] },
+      })
+    ),
+    phoneNumber: Joi.array().items(Joi.string()).required(),
   });
   return schema.validate(shop);
 };
