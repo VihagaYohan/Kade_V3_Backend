@@ -1,4 +1,5 @@
 const { Shop, validationShop } = require("../models/Shop");
+const auth = require("../middlewear/auth");
 const ErrorResponse = require("../utility/errorResponse");
 
 // @desc    create new shop under user ID
