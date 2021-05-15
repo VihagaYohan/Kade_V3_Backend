@@ -65,7 +65,6 @@ const shopSchema = new mongoose.Schema({
 // geocode and create location field
 shopSchema.pre("save", async function (next) {
   const loc = await geocoder.geocode(this.address);
-  console.log(loc);
   this.location = {
     type: "Point",
     coordinates: [loc[0].longitude, loc[0].latitude],
@@ -80,6 +79,10 @@ shopSchema.pre("save", async function (next) {
   this.address = undefined;
   next();
 });
+
+shopSchema.pre('update',async function(next){
+  console.log('update process')
+})
 
 // creating model
 const Shop = mongoose.model("Shop", shopSchema);
