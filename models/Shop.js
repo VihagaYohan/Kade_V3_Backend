@@ -80,6 +80,10 @@ shopSchema.pre("save", async function (next) {
   next();
 });
 
+shopSchema.pre('update',async function(next){
+  console.log('update process')
+})
+
 // creating model
 const Shop = mongoose.model("Shop", shopSchema);
 
@@ -94,6 +98,7 @@ const validationShop = (shop) => {
         tlds: { allow: ["com", "net"] },
       })
       .required(), */
+    address: Joi.string().required(),
     email: Joi.array().items(
       Joi.string().email({
         minDomainSegments: 2,
