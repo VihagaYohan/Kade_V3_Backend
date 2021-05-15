@@ -8,9 +8,11 @@ const ErrorResponse = require("../utility/errorResponse");
 exports.addShop = async (req, res, next) => {
   try {
     // check for data validation
+    console.log(req.body)
     const { error } = validationShop(req.body);
     if (error) return next(new ErrorResponse(error.details[0].message, 400));
 
+    // create shop
     let shop = new Shop(req.body);
     shop = await shop.save();
 

@@ -65,6 +65,7 @@ const shopSchema = new mongoose.Schema({
 // geocode and create location field
 shopSchema.pre("save", async function (next) {
   const loc = await geocoder.geocode(this.address);
+  console.log(loc);
   this.location = {
     type: "Point",
     coordinates: [loc[0].longitude, loc[0].latitude],
@@ -94,6 +95,7 @@ const validationShop = (shop) => {
         tlds: { allow: ["com", "net"] },
       })
       .required(), */
+    address: Joi.string().required(),
     email: Joi.array().items(
       Joi.string().email({
         minDomainSegments: 2,
