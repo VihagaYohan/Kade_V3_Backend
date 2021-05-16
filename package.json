@@ -16,6 +16,7 @@
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "colors": "^1.4.0",
+    "config": "^3.3.6",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "joi": "^17.4.0",

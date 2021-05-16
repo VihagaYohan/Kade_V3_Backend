@@ -2,6 +2,7 @@ const { Shop, validationShop } = require("../models/Shop");
 const auth = require("../middlewear/auth");
 const geocoder = require("../utility/geoCoder");
 const ErrorResponse = require("../utility/errorResponse");
+const config = require("config");
 
 // @desc    get all shops that status is true or shows all the available/ currently operational shops
 // @route   GET/api/shops
@@ -50,6 +51,8 @@ exports.getShop = async (req, res, next) => {
 // @route   POST/api/shops/
 // @access  PRIVATE
 exports.addShop = async (req, res, next) => {
+  console.log(process.env.GOOGLE_GEO_API_KEY);
+  console.log(config.get("GEO_API"));
   try {
     // check for data validation
     const { error } = validationShop(req.body);
@@ -134,6 +137,30 @@ exports.deleteShop = async (req, res, next) => {
     res.status(200).json({
       sucess: true,
       msg: `${shop.name} has been deleted`,
+    });
+  } catch (error) {
+    next(new ErrorResponse(error.message, 500));
+  }
+};
+
+// @desc    upload picture to shop
+// @route   PUT/api/shops/:shopId/photo
+// @access  PRIVATE
+exports.uploadImage = async (req, res, next) => {
+  try {
+    // check if the shop is existing and status set to true/active
+    const shop = await Shop.findOne({ _id: req.params.shopId, status: true });
+    if (!shop)
+      return res.status(404).json({
+        sucess: false,
+        msg: "The shop for the given ID was not found",
+      });
+
+    console.log(process.env.GOOGLE_GEO_API_KEY);
+    console.log(typeof process.env.GEOCODER_PROVIDER);
+    res.status(200).json({
+      sucess: true,
+      txt: config.get("GEO_API"),
     });
   } catch (error) {
     next(new ErrorResponse(error.message, 500));

@@ -7,6 +7,7 @@ const {
   deleteShop,
   getAllShops,
   getShop,
+  uploadImage
 } = require("../controllers/shop");
 
 const router = express.Router();
@@ -19,4 +20,6 @@ router
   .delete(auth, deleteShop)
   .get(getShop);
 
+router.route('/:shopId/photo').put(uploadImage)
+  
 module.exports = router;
