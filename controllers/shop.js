@@ -1,6 +1,6 @@
 const { Shop, validationShop } = require("../models/Shop");
 const auth = require("../middlewear/auth");
-const geocoder = require('../utility/geoCoder')
+const geocoder = require("../utility/geoCoder");
 const ErrorResponse = require("../utility/errorResponse");
 
 // @desc    create new shop under user ID
@@ -45,6 +45,7 @@ exports.updateShop = async (req, res, next) => {
     shop.email = email;
     shop.phoneNumber = phoneNumber;
 
+    // get the geocode for updated address
     const loc = await geocoder.geocode(req.body.address);
     this.location = {
       type: "Point",
@@ -55,13 +56,41 @@ exports.updateShop = async (req, res, next) => {
       state: loc[0].stateCode,
       zipcode: loc[0].zipcode,
       country: loc[0].countryCode,
-    }; 
+    };
 
+    // save updated details of the shop
     shop = await shop.save();
 
     shop.name = res.status(200).json({
       sucess: true,
       data: shop,
+    });
+  } catch (error) {
+    next(new ErrorResponse(error.message, 500));
+  }
+};
+
+// @desc    delete shop
+// @route   DELETE/api/shops/:shopId
+// @access  PRIVATE
+exports.deleteShop = async (req, res, next) => {
+  try {
+    shop = await Shop.findByIdAndUpdate(req.params.shopId, {
+      name: "Fab Restaurant",
+      status: true,
+    });
+    if (shop == null)
+      return next(
+        new ErrorResponse("The shop for the given ID was not found", 400)
+      );
+
+    setTimeout(() => {
+      console.log(shop);
+    }, 10000);
+
+    res.status(200).json({
+      sucess: true,
+      msg: `${shop.name} has been deleted`,
     });
   } catch (error) {
     next(new ErrorResponse(error.message, 500));
