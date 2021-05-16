@@ -56,6 +56,9 @@ const shopSchema = new mongoose.Schema({
     type: Boolean,
     default: true,
   },
+  photo:{
+    type:String,
+  },
   createdOn: {
     type: Date,
     default: Date.now(),

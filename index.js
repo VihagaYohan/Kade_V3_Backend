@@ -1,11 +1,12 @@
 const express = require("express");
 const dotenv = require("dotenv");
+const config = require('config')
 const Joi = require("joi");
 Joi.objectId = require("joi-objectid")(Joi);
 const morgan = require("morgan");
 const colors = require("colors");
 
-// import middle-wear
+// import middle-wears
 const errorHandler = require("./middlewear/error");
 
 // import DB connection
@@ -26,6 +27,7 @@ dotenv.config({ path: "./config/config.env" });
 
 // connect to DB
 connectDB();
+
 
 // init routes
 app.use("/api/users/", users);
