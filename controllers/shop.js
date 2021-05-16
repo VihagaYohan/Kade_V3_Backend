@@ -5,7 +5,7 @@ const ErrorResponse = require("../utility/errorResponse");
 
 // @desc    get all shops that status is true or shows all the available/ currently operational shops
 // @route   GET/api/shops
-// @access  Public
+// @access  PUBLIC
 exports.getAllShops = async (req, res, next) => {
   try {
     // check if shops available
@@ -13,11 +13,33 @@ exports.getAllShops = async (req, res, next) => {
     if (shops.length == 0)
       return next(new ErrorResponse("There are no shops to show", 404));
 
-      // return availble shops / status = true
+    // return availble shops / status = true
     res.status(200).json({
       sucess: true,
       count: shops.length,
       data: shops,
+    });
+  } catch (error) {
+    next(new ErrorResponse(error.message, 500));
+  }
+};
+
+// @desc    get shop based on shopID
+// @route   GET/api/shops/:shopId
+// @access  PUBLIC
+exports.getShop = async (req, res, next) => {
+  try {
+    // check if the shop is available
+    const shop = await Shop.findById(req.params.shopId);
+    if (!shop)
+      return next(
+        new ErrorResponse("The shop for the given ID was not found", 404)
+      );
+
+    // return shop
+    res.status(200).json({
+      sucess: true,
+      data: shop,
     });
   } catch (error) {
     next(new ErrorResponse(error.message, 500));
