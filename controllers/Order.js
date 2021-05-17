@@ -183,4 +183,63 @@ exports.addOrder = async (req, res, next) => {
   }
 };
 
+// @desc    update order
+// @route   PUT/api/orders/:orderId
+// @access  PRIVATE
+exports.updateOrder = async (req, res, next) => {
+  try {
+    // check input data validation
+    const { error } = await orderValidation(req.body);
+    if (error) return next(new ErrorResponse(error.details[0].message, 400));
 
+    // find coordinates using geo-corder
+    const loc = await geocoder.geocode(address);
+    const location = {
+      type: "Point",
+      coordinates: [loc[0].latitude, loc[0].longitude],
+      formattedAddress: loc[0].formattedAddress,
+      street: loc[0].streetName,
+      city: loc[0].city,
+      state: loc[0].stateCode,
+      zipcode: loc[0].zipcode,
+      country: loc[0].countryCode,
+    };
+
+    // updating order
+    const order = await Order.findByIdAndUpdate(
+      req.params.orderId,
+      {
+        shopId: req.body.shopId,
+        customerId: req.body.customerId,
+        orderItems: req.body.orderItems,
+        address: req.body.address,
+        location: {
+          type: "Point",
+          coordinates: location.coordinates,
+          street: location.street,
+          city: location.city,
+          state: location.state,
+          zipcode: location.zipcode,
+          country: location.country,
+        },
+        contactNo: req.body.contactNo,
+        orderType: req.body.orderType,
+        orderStatus: req.body.orderStatus,
+      },
+      { new: true }
+    );
+    
+    if (!order)
+      return res.status(400).json({
+        sucess: false,
+        data: `The ID for the given order was not found`,
+      });
+
+    res.status(200).json({
+      sucess: true,
+      data: order,
+    });
+  } catch (error) {
+    next(new ErrorResponse(error.message, 500));
+  }
+};
