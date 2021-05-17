@@ -228,7 +228,7 @@ exports.updateOrder = async (req, res, next) => {
       },
       { new: true }
     );
-    
+
     if (!order)
       return res.status(400).json({
         sucess: false,
@@ -243,3 +243,27 @@ exports.updateOrder = async (req, res, next) => {
     next(new ErrorResponse(error.message, 500));
   }
 };
+
+// @desc    change order status
+// @route   PUT/api/orders/:orderId/orderStatus
+// @access  PRIVATE
+exports.changeOrderStatus = async (req, res, next) => {
+  try {
+    let order = await Order.findByIdAndUpdate(req.params.id, {
+      orderStatus: req.body.orderStatus,
+    });
+    if (!order)
+      return next(
+        new ErrorResponse("The ID for the given order was not found", 400)
+      );
+
+    res.status(200).json({
+      sucess: true,
+      data: order,
+    });
+  } catch (error) {
+    next(new ErrorResponse(error.message, 500));
+  }
+};
+
+
