@@ -8,11 +8,15 @@ const {
   getProduct,
   getProductsForShop,
   addProduct,
+  updateProduct,
+  uploadProductImage,
 } = require("../controllers/product");
 
 router.route("/").get(getAllProducts).post([auth, shopOwner], addProduct);
 
-router.route("/:productId").get(getProduct);
+router.route("/:productId").get(getProduct).put(updateProduct);
+
+router.route("/:productId/photo").put(uploadProductImage);
 
 router.route("/:shopId/products").get(getProductsForShop);
 
