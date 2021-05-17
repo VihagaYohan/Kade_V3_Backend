@@ -1,8 +1,8 @@
 const errorHandler = (error, req, res, next) => {
   // log to console for dev
-  console.log(error.stack.red);
+  console.log(error.stack);
 
-  console.log(error)
+  console.log(error);
 
   res
     .status(error.statusCode || 500)
