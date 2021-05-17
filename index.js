@@ -1,12 +1,12 @@
 const express = require("express");
 const dotenv = require("dotenv");
-const config = require('config')
+const config = require("config");
 const Joi = require("joi");
 Joi.objectId = require("joi-objectid")(Joi);
 const morgan = require("morgan");
 const colors = require("colors");
 const fileUpload = require("express-fileupload");
-const path = require('path')
+const path = require("path");
 
 // import middle-wears
 const errorHandler = require("./middlewear/error");
@@ -18,8 +18,9 @@ const connectDB = require("./config/db");
 const users = require("./routes/users");
 const auth = require("./routes/auth");
 const shops = require("./routes/shops");
-const categories = require('./routes/categories')
-const products = require('./routes/products')
+const categories = require("./routes/categories");
+const products = require("./routes/products");
+const orderStatus = require("./routes/orderStatus");
 
 const app = express();
 
@@ -33,16 +34,17 @@ dotenv.config({ path: "./config/config.env" });
 connectDB();
 
 // file upload
-app.use(fileUpload())
+app.use(fileUpload());
 
-app.use(express.static(path.join(__dirname,'./public')))
+app.use(express.static(path.join(__dirname, "./public")));
 
 // init routes
 app.use("/api/users/", users);
 app.use("/api/auth/", auth);
 app.use("/api/shops/", shops);
-app.use('/api/categories/',categories)
-app.use('/api/products/',products)
+app.use("/api/categories/", categories);
+app.use("/api/products/", products);
+app.use("/api/orderStatus", orderStatus);
 
 // initiate middle-wear
 app.use(errorHandler);

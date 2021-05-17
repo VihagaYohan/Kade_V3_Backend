@@ -10,11 +10,16 @@ const {
   addProduct,
   updateProduct,
   uploadProductImage,
+  deleteProduct,
 } = require("../controllers/product");
 
 router.route("/").get(getAllProducts).post([auth, shopOwner], addProduct);
 
-router.route("/:productId").get(getProduct).put(updateProduct);
+router
+  .route("/:productId")
+  .get(getProduct)
+  .put(updateProduct)
+  .delete(deleteProduct);
 
 router.route("/:productId/photo").put(uploadProductImage);
 

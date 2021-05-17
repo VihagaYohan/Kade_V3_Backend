@@ -302,3 +302,37 @@ exports.updateProduct = async (req, res, next) => {
     next(new ErrorResponse(error.message, 500));
   }
 };
+
+// @desc      delete product by product ID
+// @route     DELETE/api/products/:productID
+// @access    PRIVATE
+exports.deleteProduct = async (req, res, next) => {
+  try {
+    // find product in the database
+    let product = await Product.findById(req.params.productId);
+    if (!product)
+      return next(
+        new ErrorResponse("Product for the given ID was not found", 404)
+      );
+
+    // old photokey to delete image from AWS s3
+    const oldPhotoKey = product.photoKey;
+
+    // delete product from the database
+    product = await Product.findByIdAndRemove(req.params.productId);
+    if (!product)
+      return next(
+        new ErrorResponse("Product for the given ID was not found", 404)
+      );
+
+    deleteImage(oldPhotoKey); // delete old image from AWS s3
+
+    res.status(200).json({
+      sucess: true,
+      data: `${product.productName} has been deleted`,
+    });
+  } catch (error) {
+    next(new ErrorResponse(error.message, 500));
+  }
+};
+
