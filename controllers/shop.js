@@ -3,6 +3,10 @@ const auth = require("../middlewear/auth");
 const geocoder = require("../utility/geoCoder");
 const ErrorResponse = require("../utility/errorResponse");
 const config = require("config");
+const path = require("path");
+const AWS = require("aws-sdk");
+const s3Obj = require("../utility/aws");
+const S3obj = require("../utility/aws");
 
 // @desc    get all shops that status is true or shows all the available/ currently operational shops
 // @route   GET/api/shops
@@ -149,18 +153,72 @@ exports.deleteShop = async (req, res, next) => {
 exports.uploadImage = async (req, res, next) => {
   try {
     // check if the shop is existing and status set to true/active
-    const shop = await Shop.findOne({ _id: req.params.shopId, status: true });
+    let shop = await Shop.findOne({ _id: req.params.shopId, status: true });
     if (!shop)
       return res.status(404).json({
         sucess: false,
         msg: "The shop for the given ID was not found",
       });
 
-    console.log(process.env.GOOGLE_GEO_API_KEY);
-    console.log(typeof process.env.GEOCODER_PROVIDER);
-    res.status(200).json({
-      sucess: true,
-      txt: config.get("GEO_API"),
+    // check if image file has been selected
+    if (!req.files) return next("Please select an image to upload", 400);
+
+    console.log(req.files);
+    const file = req.files.file;
+
+    // check the size of the image/file
+    const maxFileUpload = process.env.MAX_FILE_UPLOAD;
+    const fileUploadPath = process.env.FILE_UPLOOAD_PATH;
+
+    if (!file.size > maxFileUpload) {
+      res.status(400).json({
+        sucess: false,
+        data: `Please upload an image less than ${fileUploadPath}`,
+      });
+    }
+
+    // create custom file name
+    file.name = `photo_${shop._id}${path.parse(file.name).ext}`;
+    const fileName = file.name;
+
+    console.log(file.name);
+
+    // setting s3 parameters
+    const params = {
+      Bucket: process.env.AWS_BUCKET_NAME,
+      Key: fileName,
+      Body: file.data,
+      ACL: "public-read",
+    };
+
+    // upload image to AWS s3 bucket
+    S3obj.upload(params, async (error, data) => {
+      if (error)
+        return res.status(500).json({
+          sucess: false,
+          data: error,
+          message: "Problem with file upload",
+        });
+
+      console.log(data); // return data - developement purpose
+      const imageURL = data.Location;
+      const imageKey = data.Key;
+
+      console.log(imageURL); // return data - developement purpose
+      console.log(imageKey); // return data - developement purpose
+
+      // update shop document on mongoDB with public s3 URL for the image
+      shop = await Shop.findByIdAndUpdate(
+        req.params.shopId,
+        { photo: imageURL, photoKey: imageKey },
+        { new: true }
+      );
+
+      // return response object(ETag, location,key,bucket)
+      res.status(200).json({
+        sucess: true,
+        data: data,
+      });
     });
   } catch (error) {
     next(new ErrorResponse(error.message, 500));

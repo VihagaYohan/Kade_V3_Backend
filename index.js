@@ -5,6 +5,8 @@ const Joi = require("joi");
 Joi.objectId = require("joi-objectid")(Joi);
 const morgan = require("morgan");
 const colors = require("colors");
+const fileUpload = require("express-fileupload");
+const path = require('path')
 
 // import middle-wears
 const errorHandler = require("./middlewear/error");
@@ -28,6 +30,10 @@ dotenv.config({ path: "./config/config.env" });
 // connect to DB
 connectDB();
 
+// file upload
+app.use(fileUpload())
+
+app.use(express.static(path.join(__dirname,'./public')))
 
 // init routes
 app.use("/api/users/", users);

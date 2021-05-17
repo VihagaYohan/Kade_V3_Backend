@@ -58,6 +58,7 @@ const shopSchema = new mongoose.Schema({
   },
   photo:{
     type:String,
+    default:'https://kade-bucket.s3.ap-south-1.amazonaws.com/Default-Images/default-shop.png'
   },
   createdOn: {
     type: Date,
