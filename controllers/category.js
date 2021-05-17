@@ -51,14 +51,43 @@ exports.addCategory = async (req, res, next) => {
     if (error) return next(new ErrorResponse(error.details[0].message, 400));
 
     // create new product category and save
-     let category = new Category({ name: req.body.name });
+    let category = new Category({ name: req.body.name });
     category = await category.save();
 
     res.status(200).json({
       sucess: true,
       data: category,
-    }); 
+    });
   } catch (error) {
     next(error.message, 500);
+  }
+};
+
+// @desc    update product cateogry
+// @route   PUT/api/categories/:categoryId
+// @access  PRIVATE
+exports.updateCategory = async (req, res, next) => {
+  try {
+    // check for user input validation
+    const { error } = await categoryValidation(req.body);
+    if (error) return next(new ErrorResponse(error.details[0].message, 400));
+
+    // check if the category is alreay existing in the database
+    let category = await Category.findById(req.params.categoryId);
+    if (!category)
+      return next(
+        new ErrorResponse("Category for the provided ID was not found", 404)
+      );
+
+    // update category
+    category.name = req.body.name;
+    category = await category.save();
+
+    res.status(200).json({
+      sucess: true,
+      data: category,
+    });
+  } catch (error) {
+    next(new ErrorResponse(error.message, 500));
   }
 };
