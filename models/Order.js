@@ -114,4 +114,4 @@ const Order = new mongoose.model("Order", orderSchema);
 
 exports.Order = Order;
 exports.OrderSchema = orderSchema;
-exports.Validation = orderValidation;
+exports.orderValidation = orderValidation;

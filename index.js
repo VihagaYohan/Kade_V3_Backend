@@ -21,6 +21,7 @@ const shops = require("./routes/shops");
 const categories = require("./routes/categories");
 const products = require("./routes/products");
 const orderStatus = require("./routes/orderStatus");
+const orders = require("./routes/order");
 
 const app = express();
 
@@ -45,6 +46,7 @@ app.use("/api/shops/", shops);
 app.use("/api/categories/", categories);
 app.use("/api/products/", products);
 app.use("/api/orderStatus", orderStatus);
+app.use("/api/orders/", orders);
 
 // initiate middle-wear
 app.use(errorHandler);
