@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const Joi = require("joi");
 Joi.objectId = require("joi-objectid")(Joi);
 
-const geocoder = require("../util/geocoder");
+const geocoder = require("../utility/geocoder");
 const { array } = require("joi");
 
 const orderSchema = mongoose.Schema({
@@ -81,7 +81,6 @@ orderSchema.pre("save", async function (next) {
   };
   next();
 });
-
 
 orderSchema.post("update", async function (next) {
   console.log("update one worked");

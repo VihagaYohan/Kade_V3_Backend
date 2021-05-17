@@ -4,16 +4,17 @@ const {
   getOrder,
   getShopsOrders,
   getUsersOrders,
+  addOrder,
 } = require("../controllers/order");
-
+const auth = require("../middlewear/auth");
 const router = express.Router();
 
-router.route("/").get(getAllOrders);
+router.route("/").get(getAllOrders).post(auth, addOrder);
 
 router.route("/:orderId").get(getOrder);
 
 router.route("/:shopId/orders").get(getShopsOrders);
 
-router.route("/:userId/orders").get(getUsersOrders);
+router.route("/:userId/userOrders").get(getUsersOrders);
 
 module.exports = router;
