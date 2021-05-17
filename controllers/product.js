@@ -50,6 +50,27 @@ exports.getProduct = async (req, res, next) => {
   }
 };
 
+// @desc    get all products for given shop id
+// @route   GET/api/products/:shopId/products
+// @access  PUBLIC
+exports.getProductsForShop = async (req, res, next) => {
+  try {
+    const products = await Product.find({ shopId: req.params.shopId });
+    if (products.length == 0)
+      return next(
+        new ErrorResponse("Unable to locate products for given shop ID", 404)
+      );
+
+    res.status(200).json({
+      sucess: true,
+      count: products.length,
+      data: products,
+    });
+  } catch (error) {
+    next(new ErrorResponse(error.message, 500));
+  }
+};
+
 // @desc    add new product to a shop. this requires user role of admin or shop owner
 // @route   POST/api/products/:shopId/:categoryId
 // @access  PRIVATE
