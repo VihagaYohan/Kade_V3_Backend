@@ -18,6 +18,7 @@ const connectDB = require("./config/db");
 const users = require("./routes/users");
 const auth = require("./routes/auth");
 const shops = require("./routes/shops");
+const categories = require('./routes/categories')
 
 const app = express();
 
@@ -39,6 +40,7 @@ app.use(express.static(path.join(__dirname,'./public')))
 app.use("/api/users/", users);
 app.use("/api/auth/", auth);
 app.use("/api/shops/", shops);
+app.use('/api/categories/',categories)
 
 // initiate middle-wear
 app.use(errorHandler);
