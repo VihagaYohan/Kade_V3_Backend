@@ -21,6 +21,7 @@ exports.getAllOrders = async (req, res, next) => {
 
     res.status(200).json({
       sucess: true,
+      count: order.length,
       data: order,
     });
   } catch (error) {
@@ -71,12 +72,12 @@ exports.getShopsOrders = async (req, res, next) => {
 };
 
 // @desc    get all orders for a specific user
-// @route   GET/api/orders/:userId/orders
+// @route   GET/api/orders/:userId/userOrders
 // @access  PRIVATE
 exports.getUsersOrders = async (req, res, next) => {
   try {
     const orders = await Order.find({ customerId: req.params.userId });
-    if (!orders)
+    if (orders.length == 0)
       return res.status(404).json({
         sucess: false,
         data: "Unable to locate orders for the given user ID",
@@ -84,8 +85,8 @@ exports.getUsersOrders = async (req, res, next) => {
 
     res.status(200).json({
       sucess: true,
-      count: order.length,
-      data: order,
+      count: orders.length,
+      data: orders,
     });
   } catch (error) {
     next(new ErrorResponse(error.message, 500));

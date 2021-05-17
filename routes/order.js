@@ -15,6 +15,6 @@ router.route("/:orderId").get(getOrder);
 
 router.route("/:shopId/orders").get(getShopsOrders);
 
-router.route("/:userId/orders").get(getUsersOrders);
+router.route("/:userId/userOrders").get(getUsersOrders);
 
 module.exports = router;
