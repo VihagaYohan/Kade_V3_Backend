@@ -266,4 +266,22 @@ exports.changeOrderStatus = async (req, res, next) => {
   }
 };
 
+// @desc    delete order
+// @route   DELETE/api/orders/:orderId
+// @access  PRIVATE
+exports.deleteOrder = async (req, res, next) => {
+  try {
+    const order = await Order.findByIdAndRemove(req.params.orderId);
+    if (!order)
+      return next(
+        new ErrorResponse("The ID for the given order was not found", 404)
+      );
 
+    res.status(200).json({
+      sucess: true,
+      data: `${order._id} has been deleted`,
+    });
+  } catch (error) {
+    next(new ErrorResponse(error.message, 500));
+  }
+};

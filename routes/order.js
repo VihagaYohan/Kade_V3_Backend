@@ -7,13 +7,14 @@ const {
   addOrder,
   updateOrder,
   changeOrderStatus,
+  deleteOrder,
 } = require("../controllers/order");
 const auth = require("../middlewear/auth");
 const router = express.Router();
 
 router.route("/").get(getAllOrders).post(auth, addOrder);
 
-router.route("/:orderId").get(getOrder).put(updateOrder);
+router.route("/:orderId").get(getOrder).put(updateOrder).delete(deleteOrder);
 
 router.route("/:shopId/orders").get(getShopsOrders);
 
