@@ -39,3 +39,25 @@ exports.getOrder = async (req, res, next) => {
     next(new ErrorResponse(error.message, 500));
   }
 };
+
+// @desc    get all orders for a specific shop
+// @route   GET/api/orders/:shopId/orders
+// @access  PRIVATE
+exports.getShopsOrders = async (req, res, next) => {
+  try {
+    const orders = await Order.find({ shopId: req.params.shopId });
+    if (!orders)
+      return res.status(404).json({
+        sucess: false,
+        data: orders,
+      });
+
+    res.status(200).json({
+      sucess: true,
+      count: orders.length,
+      data: orders,
+    });
+  } catch (error) {
+    next(new ErrorResponse(error.message, 500));
+  }
+};
