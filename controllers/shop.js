@@ -5,7 +5,6 @@ const ErrorResponse = require("../utility/errorResponse");
 const config = require("config");
 const path = require("path");
 const AWS = require("aws-sdk");
-const s3Obj = require("../utility/aws");
 const S3obj = require("../utility/aws");
 
 // @desc    get all shops that status is true or shows all the available/ currently operational shops

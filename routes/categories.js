@@ -1,0 +1,22 @@
+const express = require("express");
+const {
+  getAllCategories,
+  getCategory,
+  addCategory,
+  updateCategory,
+  deleteCategory,
+} = require("../controllers/category");
+const admin = require("../middlewear/admin");
+const auth = require("../middlewear/auth");
+
+const router = express.Router();
+
+router.route("/").get(getAllCategories).post([auth, admin], addCategory);
+
+router
+  .route("/:categoryId")
+  .get(getCategory)
+  .put([auth, admin], updateCategory)
+  .delete([auth, admin], deleteCategory);
+
+module.exports = router;

@@ -8,6 +8,10 @@ const categorySchema = mongoose.Schema({
     minLength: 3,
     maxLength: 50,
   },
+  status:{
+      type:Boolean,
+      default:true
+  }
 });
 
 // input data validation
