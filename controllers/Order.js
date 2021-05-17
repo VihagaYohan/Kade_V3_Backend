@@ -61,3 +61,25 @@ exports.getShopsOrders = async (req, res, next) => {
     next(new ErrorResponse(error.message, 500));
   }
 };
+
+// @desc    get all orders for a specific user
+// @route   GET/api/orders/:userId/orders
+// @access  PRIVATE
+exports.getUsersOrders = async (req, res, next) => {
+  try {
+    const orders = await Order.find({ customerId: req.params.userId });
+    if (!orders)
+      return res.status(404).json({
+        sucess: false,
+        data: "Unable to locate orders for the given user ID",
+      });
+
+    res.status(200).json({
+      sucess: true,
+      count: order.length,
+      data: order,
+    });
+  } catch (error) {
+    next(new ErrorResponse(error.message, 500));
+  }
+};
