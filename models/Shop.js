@@ -19,6 +19,10 @@ const shopSchema = new mongoose.Schema({
     required: [true, "Please add an address"],
     maxlength: [100, "Address should not be longer than 100 characters"],
   },
+  categories: {
+    type: [String],
+    required: true,
+  },
   location: {
     // GEO Json point
     type: {
@@ -56,9 +60,10 @@ const shopSchema = new mongoose.Schema({
     type: Boolean,
     default: true,
   },
-  photo:{
-    type:String,
-    default:'https://kade-bucket.s3.ap-south-1.amazonaws.com/Default-Images/default-shop.png'
+  photo: {
+    type: String,
+    default:
+      "https://kade-bucket.s3.ap-south-1.amazonaws.com/Default-Images/default-shop.png",
   },
   createdOn: {
     type: Date,
@@ -84,9 +89,9 @@ shopSchema.pre("save", async function (next) {
   next();
 });
 
-shopSchema.pre('update',async function(next){
-  console.log('update process')
-})
+shopSchema.pre("update", async function (next) {
+  console.log("update process");
+});
 
 // creating model
 const Shop = mongoose.model("Shop", shopSchema);

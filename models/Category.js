@@ -8,10 +8,15 @@ const categorySchema = mongoose.Schema({
     minLength: 3,
     maxLength: 50,
   },
-  status:{
-      type:Boolean,
-      default:true
-  }
+  photo: {
+    type: String,
+    default:
+      "https://kade-bucket.s3.ap-south-1.amazonaws.com/Default-Images/default-image.jpg",
+  },
+  status: {
+    type: Boolean,
+    default: true,
+  },
 });
 
 // input data validation
