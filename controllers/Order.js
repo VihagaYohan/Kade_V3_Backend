@@ -193,7 +193,7 @@ exports.updateOrder = async (req, res, next) => {
     if (error) return next(new ErrorResponse(error.details[0].message, 400));
 
     // find coordinates using geo-corder
-    const loc = await geocoder.geocode(address);
+    const loc = await geocoder.geocode(req.body.address);
     const location = {
       type: "Point",
       coordinates: [loc[0].latitude, loc[0].longitude],
