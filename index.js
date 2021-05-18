@@ -51,7 +51,7 @@ app.use("/api/orders/", orders);
 // initiate middle-wear
 app.use(errorHandler);
 
-const PORT = 8000;
+const PORT = 3000;
 
 // listen to server port
 app.listen(PORT, () => {
