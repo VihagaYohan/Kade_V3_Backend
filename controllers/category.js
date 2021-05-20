@@ -3,6 +3,7 @@ const {
   categorySchema,
   categoryValidation,
 } = require("../models/Category");
+const { Product } = require("../models/Product");
 const ErrorResponse = require("../utility/errorResponse");
 const S3obj = require("../utility/aws");
 const path = require("path");
@@ -182,6 +183,32 @@ exports.deleteCategory = async (req, res, next) => {
     res.status(200).json({
       sucess: true,
       msg: `${category.name} has been deleted`,
+    });
+  } catch (error) {
+    next(new ErrorResponse(error.message, 500));
+  }
+};
+
+// @desc    get list of products for provided category id
+// @route   GET/api/categories/:categoryId/products
+// @access  PUBLIC
+exports.getProducts = async (req, res, next) => {
+  try {
+    const products = await Product.find({
+      productCategoryId: req.params.categoryId,
+    }).populate('shopId');
+    if (products.length == 0)
+      return next(
+        new ErrorResponse(
+          "There are no products for the given category ID",
+          400
+        )
+      );
+
+    res.status(200).json({
+      sucess: true,
+      count: products.length,
+      data: products,
     });
   } catch (error) {
     next(new ErrorResponse(error.message, 500));

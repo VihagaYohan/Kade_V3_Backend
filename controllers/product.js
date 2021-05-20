@@ -74,6 +74,7 @@ exports.getProductsForShop = async (req, res, next) => {
   }
 };
 
+
 // @desc    add new product to a shop. this requires user role of admin or shop owner
 // @route   POST/api/products/:shopId/:categoryId
 // @access  PRIVATE
