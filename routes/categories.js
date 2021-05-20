@@ -5,6 +5,7 @@ const {
   addCategory,
   updateCategory,
   deleteCategory,
+  getProducts,
 } = require("../controllers/category");
 const admin = require("../middlewear/admin");
 const auth = require("../middlewear/auth");
@@ -18,5 +19,7 @@ router
   .get(getCategory)
   .put([auth, admin], updateCategory)
   .delete([auth, admin], deleteCategory);
+
+router.route("/:categoryId/products").get(getProducts);
 
 module.exports = router;
