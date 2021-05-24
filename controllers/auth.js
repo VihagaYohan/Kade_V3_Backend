@@ -85,6 +85,7 @@ exports.loginUser = async (req, res, next) => {
     res.status(200).json({
       sucess: true,
       token: token,
+      user:user
     });
   } catch (error) {
     next(new ErrorResponse("${error.message}", 500));

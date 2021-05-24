@@ -37,7 +37,9 @@ exports.getAllProducts = async (req, res, next) => {
 exports.getProduct = async (req, res, next) => {
   try {
     // check if the product category is existing in the database
-    const product = await Product.findById(req.params.productId);
+    const product = await Product.findById(req.params.productId).populate(
+      "shopId"
+    );
     if (!product)
       return next(
         new ErrorResponse("Product for the given ID was not found", 404)
@@ -73,7 +75,6 @@ exports.getProductsForShop = async (req, res, next) => {
     next(new ErrorResponse(error.message, 500));
   }
 };
-
 
 // @desc    add new product to a shop. this requires user role of admin or shop owner
 // @route   POST/api/products/:shopId/:categoryId
@@ -336,4 +337,3 @@ exports.deleteProduct = async (req, res, next) => {
     next(new ErrorResponse(error.message, 500));
   }
 };
-
