@@ -3,6 +3,6 @@ const router = express.Router();
 
 const { createPaymentIntent } = require("../controllers/payments");
 
-router.route("/").get(createPaymentIntent);
+router.route("/").post(createPaymentIntent);
 
 module.exports = router;
